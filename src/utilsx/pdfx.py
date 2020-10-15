@@ -15,9 +15,9 @@ import numpy as np
 from datetime import datetime, date
 
 # import other homegrown modules
-from utils.readin import read_yaml
-from utils.readin import checkdir
-from utils.opsys import mv_file
+from utilsx.readin import read_yaml
+from utilsx.readin import checkdir
+from utilsx.opsys import mv_file
 
 """
 This module contains functions for extracting data from pdf tables
