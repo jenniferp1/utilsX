@@ -1,0 +1,647 @@
+
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>utilsx.readin &#8212; utilsx 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">utilsx 0.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">utilsx.readin</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utilsx.readin</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Open and read files.</span>
+
+<span class="sd">Functions associated with the process of finding, opening, or reading</span>
+<span class="sd">files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1">############################################</span>
+<span class="c1"># Import Packages</span>
+<span class="c1">############################################</span>
+
+
+<span class="c1"># import standard Python packages</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">chardet</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urljoin</span>
+
+
+<span class="c1">##########################################</span>
+<span class="c1"># Functions</span>
+<span class="c1">##########################################</span>
+
+<div class="viewcode-block" id="checkdir"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.checkdir">[docs]</a><span class="k">def</span> <span class="nf">checkdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a directory.</span>
+
+<span class="sd">    Check to see if a directory exists and create</span>
+<span class="sd">    it if it does not.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Fully qualified path and folder name.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    None : None</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        &gt; folder = &quot;C:/Users/doejohn/Documents/MyDir&quot;</span>
+<span class="sd">        &gt; checkdir(folder)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="check_last_load"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.check_last_load">[docs]</a><span class="k">def</span> <span class="nf">check_last_load</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">key_phrase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for last file loaded on GitHub.</span>
+
+<span class="sd">    Given a GitHub url and a dictionary with a regex pattern and</span>
+<span class="sd">    load date, will check for a file that is more recent than the</span>
+<span class="sd">    provided load date.</span>
+
+<span class="sd">    Regex pattern should identify a date pattern in the file name string.</span>
+<span class="sd">    Load date should be the most recent file a user previously downloaded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        Github url where files are located.</span>
+<span class="sd">    key_phrase : dict</span>
+<span class="sd">        Dictionary with date regex pattern and last load date of most recent file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        URL for a more recent file or None if user previously downloaded most recent file.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ---------</span>
+<span class="sd">    utilsx.readin.date_in_str</span>
+<span class="sd">    utilsx.readin.scan_csv_list</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    Sample dictionary format</span>
+
+<span class="sd">    .. code-block:: text</span>
+
+<span class="sd">        {&quot;pattern&quot;:&quot;\\d{4}-\\d{2}-\\d{2}&quot;, &quot;last_date&quot;:&quot;2020-08-31&quot;}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">urls</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">scan_csv_list</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">new_date</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">new_date</span> <span class="o">=</span> <span class="n">date_in_str</span><span class="p">(</span><span class="n">key_phrase</span><span class="p">[</span><span class="s2">&quot;pattern&quot;</span><span class="p">],</span><span class="n">key_phrase</span><span class="p">[</span><span class="s2">&quot;last_date&quot;</span><span class="p">],</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_date</span><span class="p">:</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">pos</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">urls</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">url</span></div>
+
+
+<div class="viewcode-block" id="date_in_str"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.date_in_str">[docs]</a><span class="k">def</span> <span class="nf">date_in_str</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">prev_date</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract date from a string.</span>
+
+<span class="sd">    Given a string with a date pattern, extract the date.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    pattern : regex</span>
+<span class="sd">        Regex date pattern (e.g., &quot;\\d{4}-\\d{2}-\\d{2}&quot;).</span>
+<span class="sd">    prev_date: str</span>
+<span class="sd">        Date to compare to date extracted with regex pattern (e.g., &quot;2020-08-31&quot;).</span>
+<span class="sd">    string : str</span>
+<span class="sd">        String with a date in it that will be extracted.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    str</span>
+<span class="sd">        Date match extracted from string if match is more recent than prev_date; otherwise returns None.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ---------</span>
+<span class="sd">    utilsx.readin.check_last_load</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">prev_date</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">m</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="file_signature"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.file_signature">[docs]</a><span class="k">def</span> <span class="nf">file_signature</span><span class="p">(</span><span class="n">fpath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get file format.</span>
+
+<span class="sd">    Try to return file format based on file signature.</span>
+<span class="sd">    May return multiple extensions if a file signature applies</span>
+<span class="sd">    to more than one (see :ref:`filesig-reference-label`).</span>
+<span class="sd">    If no matching file signatures found, returns &quot;unknown&quot;.</span>
+
+<span class="sd">    Requirements: a YAML file with file formats and signatures to run.</span>
+<span class="sd">    The YAML should be called `fileformat.yml &lt;./fileformatyml.html&gt;`_ and saved in the `utilsx` package.</span>
+
+<span class="sd">    Sample `fileformat.yml` structure:</span>
+
+<span class="sd">    format description:</span>
+<span class="sd">        | format: [&quot;extension&quot;]</span>
+<span class="sd">        | offset: 0</span>
+<span class="sd">        | signature: [&quot;hexadecimal notation&quot;]</span>
+
+<span class="sd">    Format description helps the user understand what file type(s) the data block applies to,</span>
+<span class="sd">    for example, MicroSoft Office.</span>
+<span class="sd">    Examples for &quot;extension&quot; are &quot;xlsx&quot;, &quot;csv&quot;, &quot;xml&quot;</span>
+<span class="sd">    inputs values for offset and the signature&#39;s hexadecimal notation can be found</span>
+<span class="sd">    by referring to the `File Signatures Directory &lt;https://filesignatures.net/index.php?search=json&amp;mode=EXT&gt;`_.</span>
+
+<span class="sd">    .. tip:: A typical fileformat.yml example is found `here &lt;./fileformatyml.html&gt;`_</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    fpath : str</span>
+<span class="sd">        Fully qualified file name (path+name).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list</span>
+<span class="sd">        File format extension(s).</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ----------</span>
+<span class="sd">    utilsx.readin.get_fnames</span>
+
+
+<span class="sd">    .. _filesig-reference-label:</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ------------</span>
+<span class="sd">    `File Signature Directory &lt;https://filesignatures.net/index.php?search=json&amp;mode=EXT&gt;`_</span>
+
+<span class="sd">    `File Signatures &lt;https://www.garykessler.net/library/file_sigs.html&gt;`_</span>
+
+<span class="sd">    `How to determine file format using Python &lt;https://hackernoon.com/determining-file-format-using-python-c4e7b18d4fc4&gt;`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">utilsx_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="n">utilsx_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">utilsx_dir</span><span class="p">)</span>
+    <span class="n">fileformats</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">utilsx_dir</span><span class="si">}</span><span class="se">\\</span><span class="s2">fileformat.yml&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileformats</span><span class="p">)</span> <span class="k">as</span> <span class="n">ff</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">ff</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error: fileformat.yml is missing from </span><span class="si">{</span><span class="n">utilsx_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Stopping run.  Replace fileformat.yml before running again.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span><span class="s2">&quot;rb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">hex_bytes</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{:02X}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span> <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="n">file</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">properties</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">signature</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;signature&quot;</span><span class="p">]:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;offset&quot;</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;offset&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">signature</span> <span class="o">==</span> <span class="n">hex_bytes</span><span class="p">[</span><span class="n">offset</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span><span class="o">+</span><span class="n">offset</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">ext</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">ext</span></div>
+
+
+<div class="viewcode-block" id="get_absolute_path"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.get_absolute_path">[docs]</a><span class="k">def</span> <span class="nf">get_absolute_path</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">doc_url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create absolute url.</span>
+
+<span class="sd">    Creates the full URL of the page that you want the link to</span>
+<span class="sd">    by combining the protocol, domain name and location following the root domain.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        Protocol (https) and root domain parts of the absolute url.</span>
+<span class="sd">    doc_url : str</span>
+<span class="sd">        Location following the root domain.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    str</span>
+<span class="sd">        Absolute url (entire address).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ----------</span>
+<span class="sd">    The function returns an absolute url based on it&#39;s protocol+domain name</span>
+<span class="sd">    and relative url.  An example of the components is shown below.</span>
+
+<span class="sd">    Absolute URL:</span>
+
+<span class="sd">        https://www.example.com/xyz.html</span>
+
+<span class="sd">    Relative URL (i.e., this is the location following the domain):</span>
+
+<span class="sd">        /xyz.html</span>
+
+<span class="sd">    Domain name:</span>
+
+<span class="sd">        www.example.com</span>
+
+<span class="sd">    Protocol:</span>
+
+<span class="sd">        https</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">urljoin</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">doc_url</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_fnames"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.get_fnames">[docs]</a><span class="k">def</span> <span class="nf">get_fnames</span><span class="p">(</span><span class="n">dpath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get list of file names.</span>
+
+<span class="sd">    Given a directory path, return a dictionary of file names.</span>
+<span class="sd">    The dictionary key-value structure is {file_name:[file_extension]}.</span>
+<span class="sd">    The file extension can later be used to identify file type or format if</span>
+<span class="sd">    needed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    dpath : str</span>
+<span class="sd">        Directory path to be scanned for files.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary with file names as keys and file extension as values.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ----------</span>
+<span class="sd">    utilsx.readin.file_signature</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fdict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># get list of full path and name of files in directory (subdirectories removed)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">dpath</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
+
+
+    <span class="c1"># use file signatures to get file format (if possible)</span>
+    <span class="c1"># if extension is unknown use extension from file name</span>
+    <span class="c1"># if multiple extensions returned, match to file name</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">file_signature</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">fext</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fext</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">ext</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Warning: unknown signature for </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fext</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> using file name&#39;s extension as file type</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="n">fext</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> no known extension available</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Warning: multiple possible format types for </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> will try to select best option using file name&#39;s extension</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fext</span> <span class="ow">in</span> <span class="n">ext</span><span class="p">:</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="n">fext</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Warning: could not match extension to list of options </span><span class="si">{</span><span class="n">file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;unknown&quot;</span><span class="p">]</span>
+
+        <span class="n">fdict</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="n">ext</span>
+
+    <span class="k">return</span> <span class="n">fdict</span></div>
+
+
+<div class="viewcode-block" id="most_recent"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.most_recent">[docs]</a><span class="k">def</span> <span class="nf">most_recent</span><span class="p">(</span><span class="n">filedir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find most recent file in directory.</span>
+
+<span class="sd">    Scan files in a directory and return the most recently</span>
+<span class="sd">    modified file name.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    filedir : str</span>
+<span class="sd">        Full directory path to scan.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    str</span>
+<span class="sd">        Most recently modified file name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">iglob</span><span class="p">(</span><span class="n">filedir</span><span class="p">),</span><span class="n">key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">file</span></div>
+
+
+<div class="viewcode-block" id="read_yaml"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.read_yaml">[docs]</a><span class="k">def</span> <span class="nf">read_yaml</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">abort</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read a yaml file.</span>
+
+<span class="sd">    Scan a yaml file for user specified data block and then</span>
+<span class="sd">    read that data block and return contents to user.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ------------</span>
+<span class="sd">    params : list</span>
+<span class="sd">        Two itemed list: (1) fully qualified path and name of yaml (2) data block header name.</span>
+<span class="sd">    abort : bool</span>
+<span class="sd">        True if program should exit upon error; False to continue running. (default is True).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ---------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Data block read from yaml; stored as a dictionary.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    ------</span>
+<span class="sd">    **Error Handling Options**</span>
+
+<span class="sd">    There are two options if an error is encountered during read.</span>
+
+<span class="sd">    * abort = True: calling program will exit (run aborts)</span>
+<span class="sd">    * abort = False: continues running but will return False instead of a data block.</span>
+
+<span class="sd">    If abort = False is used, user can error check returned value by verifying if False.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ---------</span>
+<span class="sd">    The function reads a yaml and extarcts a data block based on a user-supplied</span>
+<span class="sd">    header name.  A sample yaml and example call are provided below.</span>
+
+<span class="sd">    **yaml sample structure**</span>
+
+<span class="sd">    MyHeader:</span>
+<span class="sd">        | keyword1: &lt;some value&gt;</span>
+<span class="sd">        | keyword2: &lt;another value&gt;</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | keywordn: &lt;last value&gt;</span>
+
+<span class="sd">    MyHeader2:</span>
+<span class="sd">        | keyword1: &lt;some value&gt;</span>
+<span class="sd">        | keyword2: &lt;another value&gt;</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | keywordn: &lt;last value&gt;</span>
+
+<span class="sd">    | ...</span>
+<span class="sd">    | ...</span>
+
+<span class="sd">    MyHeaderN:</span>
+<span class="sd">        | keyword1: &lt;some value&gt;</span>
+<span class="sd">        | keyword2: &lt;another value&gt;</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | ...</span>
+<span class="sd">        | keywordn: &lt;last value&gt;</span>
+
+<span class="sd">    .. note:: Note: keyword values can be strings, lists, dictionarys, numeric, etc.</span>
+
+<span class="sd">    Using the sample yaml above, you implement read_yaml as follows</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        data_block = read_yaml([&quot;Path/to/your/yaml.yml&quot;,&quot;MyHeader1&quot;])</span>
+
+<span class="sd">    This will return a dictionary with the key-value pairs from the MyHeader1</span>
+<span class="sd">    data block.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># params list with yaml file name, header</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">header</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">abort</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Error in reading user supplied yaml&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exiting....&quot;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="scan_csv_list"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.scan_csv_list">[docs]</a><span class="k">def</span> <span class="nf">scan_csv_list</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scan list of files on GitHub.</span>
+
+<span class="sd">    Given a GitHub repo url, scan the list of files</span>
+<span class="sd">    and return urls for all CSV files found and the names</span>
+<span class="sd">    of those files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    url : str</span>
+<span class="sd">        GitHub repo url.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    urls : list</span>
+<span class="sd">        List of urls ending in .csv.</span>
+<span class="sd">    names : list</span>
+<span class="sd">        List of .csv file names.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ---------</span>
+<span class="sd">    utilsx.readin.check_last_load</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ------------</span>
+<span class="sd">    `Get list of CSVs from GitHub repo &lt;https://stackoverflow.com/questions/60924860/python-get-list-of-csv-files-in-public-github-repository&gt;`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Issue request: r =&gt; requests.models.Response</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+    <span class="c1"># Extract text: html_doc =&gt; str</span>
+    <span class="n">html_doc</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+
+    <span class="c1"># Parse the HTML: soup =&gt; bs4.BeautifulSoup</span>
+    <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html_doc</span><span class="p">,</span> <span class="s1">&#39;html.parser&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Find all &#39;a&#39; tags (which define hyperlinks): a_tags =&gt; bs4.element.ResultSet</span>
+    <span class="n">a_tags</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Store a list of urls ending in .csv: urls =&gt; list</span>
+    <span class="n">urls</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;https://raw.githubusercontent.com&#39;</span><span class="o">+</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;/blob&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">a_tags</span>  <span class="k">if</span> <span class="s1">&#39;.csv&#39;</span> <span class="ow">in</span> <span class="n">link</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)]</span>
+
+    <span class="c1"># Store a list of file names</span>
+    <span class="n">list_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="n">url</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)]</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">urls</span><span class="p">,</span> <span class="n">list_names</span></div>
+
+
+<div class="viewcode-block" id="unicodify"><a class="viewcode-back" href="../../utilsx.html#utilsx.readin.unicodify">[docs]</a><span class="k">def</span> <span class="nf">unicodify</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">min_confidence</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check encoding and covert to unicode.</span>
+
+<span class="sd">    Take some raw data of unknown character encoding and ensure it is unicode</span>
+<span class="sd">    before further processing.  Helps avoid codec decode errors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    seq : str</span>
+<span class="sd">        Raw text of unknown encoding.</span>
+<span class="sd">    min_confidence : float</span>
+<span class="sd">        Confidence level [0-1] for determining encoding. (default = 0.5)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    str</span>
+<span class="sd">        Raw data converted to Unicode.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ------------</span>
+<span class="sd">    `Check encoding and convert to unicode &lt;https://stackoverflow.com/questions/14856872/check-encoding-and-convert-to-unicode&gt;`_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">chardet</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">guess</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min_confidence</span><span class="p">:</span>
+        <span class="c1"># chardet isn&#39;t confident enough in its guess, so:</span>
+        <span class="k">raise</span> <span class="ne">UnicodeDecodeError</span>
+
+    <span class="k">return</span> <span class="n">seq</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">guess</span><span class="p">[</span><span class="s2">&quot;encoding&quot;</span><span class="p">])</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">utilsx 0.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">utilsx.readin</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, FCA.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

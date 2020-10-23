@@ -1,0 +1,45 @@
+utilsx package
+==============
+
+Submodules
+----------
+
+utilsx.opsys module
+********************
+
+.. automodule:: utilsx.opsys
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+utilsx.pdfx module
+********************
+
+.. automodule:: utilsx.pdfx
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+utilsx.preproc module
+**********************
+
+.. automodule:: utilsx.preproc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+utilsx.readin module
+*********************
+
+.. automodule:: utilsx.readin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+..
+  Module contents
+  ---------------
+  .. automodule:: utilsx
+     :members:
+     :undoc-members:
+     :show-inheritance:

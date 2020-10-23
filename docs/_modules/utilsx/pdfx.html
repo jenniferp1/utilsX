@@ -1,0 +1,273 @@
+
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>utilsx.pdfx &#8212; utilsx 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/cloud.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noticia+Text|Open+Sans|Droid+Sans+Mono" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+
+    
+    
+     
+        <script src="../../_static/jquery.cookie.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.base.js"></script>
+    
+
+    
+     
+        <script src="../../_static/cloud.js"></script>
+    
+
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+    <div class="relbar-top">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">utilsx 0.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">utilsx.pdfx</a></li> 
+      </ul>
+    </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utilsx.pdfx</h1><div class="highlight"><pre>
+<span></span><span class="c1"># find other in-house packages in directory path</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">inspect</span>
+
+<span class="n">currentdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getfile</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">()))</span>
+<span class="p">)</span>
+<span class="n">parentdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">currentdir</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">parentdir</span><span class="p">)</span>
+
+<span class="c1"># import standard Python packages</span>
+<span class="kn">import</span> <span class="nn">camelot</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">date</span>
+
+<span class="c1"># import other homegrown modules</span>
+<span class="kn">from</span> <span class="nn">utilsx.readin</span> <span class="kn">import</span> <span class="n">read_yaml</span>
+<span class="kn">from</span> <span class="nn">utilsx.readin</span> <span class="kn">import</span> <span class="n">checkdir</span>
+<span class="kn">from</span> <span class="nn">utilsx.opsys</span> <span class="kn">import</span> <span class="n">mv_file</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains functions for extracting data from pdf tables</span>
+<span class="sd">It is broken into sections by function purpose</span>
+<span class="sd">1. General functions - generic; setups configurations used by Specific functions</span>
+<span class="sd">2. Specific functions - functions for specific processing based on data sources</span>
+<span class="sd">3. Caller functions - short, single-purpose, only used to launch Specific functions from General functions</span>
+<span class="sd">    Used so user can specify pages in pdf with tables to parse and identify the Specific functions</span>
+<span class="sd">    needed to process the data source</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># GENERAL FUNCTIONS</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="parse_pdf"><a class="viewcode-back" href="../../utilsx.html#utilsx.pdfx.parse_pdf">[docs]</a><span class="k">def</span> <span class="nf">parse_pdf</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">pdf_name</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Note: calling this function requires the user to set up a file called</span>
+<span class="sd">    pdf_formatter.yml in their launch directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">curdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">yaml_pdf</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">curdir</span><span class="si">}</span><span class="s2">/pdf_formatter.yml&quot;</span>  <span class="c1">#this file is needed in your launch directory if downloading pdfs</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">read_yaml</span><span class="p">([</span><span class="n">yaml_pdf</span><span class="p">,</span> <span class="n">url</span><span class="p">])</span>
+    <span class="n">funct</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span>
+
+    <span class="n">pdf_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">pdf_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">txt</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+    <span class="n">funct</span> <span class="o">=</span> <span class="n">funct</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;pdf_name&quot;</span><span class="p">,</span> <span class="n">pdf_name</span><span class="p">)</span>
+    <span class="n">funct</span> <span class="o">=</span> <span class="n">funct</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;txt&quot;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+    <span class="n">funct</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">funct</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;\n\tCalling function to be used: {funct}\n&quot;)  # Uncomment for degbugging</span>
+
+    <span class="n">loc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exec</span><span class="p">(</span><span class="n">funct</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="n">loc</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="s1">&#39;dframe&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># CALLER FUNCTIONS</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="call_parse_mn_weekly_report"><a class="viewcode-back" href="../../utilsx.html#utilsx.pdfx.call_parse_mn_weekly_report">[docs]</a><span class="k">def</span> <span class="nf">call_parse_mn_weekly_report</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">pgs</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">pgs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">pgs</span><span class="p">)</span>
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">parse_mn_weekly_report</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">pgs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dframe</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># SPECIFIC FUNCTIONS</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Minnesota Department of Health - COVID-19 data</span>
+<div class="viewcode-block" id="parse_mn_weekly_report"><a class="viewcode-back" href="../../utilsx.html#utilsx.pdfx.parse_mn_weekly_report">[docs]</a><span class="k">def</span> <span class="nf">parse_mn_weekly_report</span><span class="p">(</span><span class="n">pdf_name</span><span class="p">,</span> <span class="n">txt</span><span class="p">,</span> <span class="n">pgs</span><span class="p">,</span> <span class="n">ws</span><span class="o">=</span><span class="mi">101</span><span class="p">):</span>
+
+    <span class="n">tables</span> <span class="o">=</span> <span class="n">camelot</span><span class="o">.</span><span class="n">read_pdf</span><span class="p">(</span><span class="n">pdf_name</span><span class="p">,</span> <span class="n">pages</span><span class="o">=</span><span class="n">pgs</span><span class="p">)</span>
+    <span class="n">datatable</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+        <span class="n">whitespace</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">parsing_report</span><span class="p">[</span><span class="s2">&quot;whitespace&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">whitespace</span> <span class="o">&lt;</span> <span class="n">ws</span><span class="p">:</span>
+            <span class="n">ws</span> <span class="o">=</span> <span class="n">whitespace</span>
+            <span class="n">datatable</span> <span class="o">=</span> <span class="n">t</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">datatable</span><span class="o">.</span><span class="n">df</span>
+
+    <span class="n">day</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d{1,2}\/\d{1,2}\/\d</span><span class="si">{4}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">day</span><span class="p">,</span><span class="s2">&quot;%m/</span><span class="si">%d</span><span class="s2">/%Y&quot;</span><span class="p">)</span>
+    <span class="n">day</span> <span class="o">=</span> <span class="n">day</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">main_folder</span> <span class="o">=</span> <span class="s2">&quot;./minnesota/original_docs&quot;</span>
+    <span class="n">checkdir</span><span class="p">(</span><span class="n">main_folder</span><span class="p">)</span>  <span class="c1"># create folder if fpath does not exist</span>
+    <span class="n">file_weeklypos</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">main_folder</span><span class="si">}</span><span class="s2">/mdh_weekly_positivity_</span><span class="si">{</span><span class="n">day</span><span class="si">}</span><span class="s2">.csv&quot;</span>
+
+    <span class="n">dframe</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_weeklypos</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">clean_mn_weekly_report</span><span class="p">(</span><span class="n">file_weeklypos</span><span class="p">)</span>
+
+    <span class="n">mv_file</span><span class="p">(</span><span class="n">pdf_name</span><span class="p">,</span> <span class="n">main_folder</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dframe</span></div>
+
+
+<div class="viewcode-block" id="clean_mn_weekly_report"><a class="viewcode-back" href="../../utilsx.html#utilsx.pdfx.clean_mn_weekly_report">[docs]</a><span class="k">def</span> <span class="nf">clean_mn_weekly_report</span><span class="p">(</span><span class="n">file_weeklypos</span><span class="p">):</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_weeklypos</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">partitions</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">dframe</span><span class="p">,</span> <span class="n">partitions</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">dfs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;County&quot;</span><span class="p">,</span><span class="s2">&quot;Positive&quot;</span><span class="p">]</span>
+    <span class="n">dfs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;County&quot;</span><span class="p">,</span><span class="s2">&quot;Positive&quot;</span><span class="p">]</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">dfs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dfs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">dframe</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dframe</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dframe</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">dframe</span><span class="p">[</span><span class="s1">&#39;County&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="s1">&#39;County&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;\-?(\d+\.?\d*|\d*\.?\d+)&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">dframe</span><span class="p">[</span><span class="o">~</span><span class="n">dframe</span><span class="o">.</span><span class="n">County</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Unknown&quot;</span><span class="p">)]</span>
+
+    <span class="n">fips</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;/home/jennifp3/Documents/datasets/county_fips.csv&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fips&quot;</span><span class="p">:</span><span class="nb">str</span><span class="p">})</span>
+    <span class="n">fips</span> <span class="o">=</span> <span class="n">fips</span><span class="p">[</span><span class="n">fips</span><span class="o">.</span><span class="n">stateiso</span><span class="o">==</span><span class="s2">&quot;MN&quot;</span><span class="p">]</span>
+    <span class="n">fips</span><span class="p">[</span><span class="s2">&quot;county&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fips</span><span class="p">[</span><span class="s2">&quot;county&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; County&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">dframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">dframe</span><span class="p">,</span> <span class="n">fips</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;County&quot;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;county&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+    <span class="n">dframe</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;county&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># print(dframe.head())</span>
+
+    <span class="k">return</span> <span class="n">dframe</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+    
+    
+        <div class="sidebar-toggle-group no-js">
+            
+            <button class="sidebar-toggle" id="sidebar-hide" title="Hide the sidebar menu">
+                 «
+                <span class="show-for-small">hide menu</span>
+                
+            </button>
+            <button class="sidebar-toggle" id="sidebar-show" title="Show the sidebar menu">
+                
+                <span class="show-for-small">menu</span>
+                <span class="hide-for-small">sidebar</span>
+                 »
+            </button>
+        </div>
+    
+      <div class="clearer"></div>
+    </div>
+    <div class="relbar-bottom">
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> &nbsp; &nbsp;</li>
+    <li><a href="../../index.html">utilsx 0.0.1 documentation</a> &#187;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">utilsx.pdfx</a></li> 
+      </ul>
+    </div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, FCA.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+    <!-- cloud_sptheme 1.4 -->
+  </body>
+</html>

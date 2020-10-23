@@ -1,0 +1,9 @@
+YAML Example
+================
+
+.. image:: _static/fileformatyml.png
+  :width: 700
+  :alt: yaml example format
+
+An example of the `fileformat.yml` required to use `utilsx.readin.file_signature() <./utilsx.html#utilsx.readin.file_signature>`_.
+A copy of the yaml should be saved in the `utilsx` package with the `readin <./utilsx.html#module-utilsx.readin>`_ module.

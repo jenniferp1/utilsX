@@ -1,0 +1,62 @@
+readin functions
+===================
+
+Functions for locating, opening, or reading files.
+
+List by function
+------------------
+
+Creating a directory
+********************************
+`checkdir <./utilsx.html#utilsx.readin.checkdir>`_ - create a directory if it does not exist.
+
+Encoding (unicode)
+********************
+`unicodify <./utilsx.html#utilsx.readin.unicodify>`_ - determine character encoding and convert to unicode.
+
+Getting file information
+****************************
+`file_signature <./utilsx.html#utilsx.readin.file_signature>`_ - get a file's format (i.e., xlsx, xml, ...).
+
+`get_absolute_path <./utilsx.html#utilsx.readin.get_absolute_path>`_ - return absolute url of web-base file based on domain name and relative url.
+
+`get_fnames <./utilsx.html#utilsx.readin.get_fnames>`_ - get list of file names in a directory.
+
+`most_recent <./utilsx.html#utilsx.readin.most_recent>`_ - file the most recently modified file in a directory.
+
+GitHub files
+*************
+`check_last_load <./utilsx.html#utilsx.readin.check_last_load>`_ - check for last file loaded on GitHub.
+
+`scan_csv_list <./utilsx.html#utilsx.readin.scan_csv_list>`_ - scan files on GitHub and return names and URLs for all CSVs.
+
+Reading file
+****************
+`read_yaml <./utilsx.html#utilsx.readin.read_yaml>`_ - scan a yaml file and return user specified data block.
+
+Regex
+*********
+`date_in_str <./utilsx.html#utilsx.readin.date_in_str>`_ - extract a date pattern from a string.
+
+List by alphabet
+------------------
+
+`check_last_load <./utilsx.html#utilsx.readin.check_last_load>`_ - check for last file loaded on GitHub.
+
+`checkdir <./utilsx.html#utilsx.readin.checkdir>`_ - create a directory if it does not exist.
+
+`date_in_str <./utilsx.html#utilsx.readin.date_in_str>`_ - extract a date pattern from a string.
+
+`file_signature <./utilsx.html#utilsx.readin.file_signature>`_ - get a file's format (i.e., xlsx, xml, ...).
+
+`get_absolute_path <./utilsx.html#utilsx.readin.get_absolute_path>`_ - return absolute url of web-base file based on domain name and relative url.
+
+`get_fnames <./utilsx.html#utilsx.readin.get_fnames>`_ - get list of file names in a directory.
+
+`most_recent <./utilsx.html#utilsx.readin.most_recent>`_ - file the most recently modified file in a directory.
+
+`read_yaml <./utilsx.html#utilsx.readin.read_yaml>`_ - scan a yaml file and return user specified data block.
+
+`scan_csv_list <./utilsx.html#utilsx.readin.scan_csv_list>`_ - scan files on GitHub and return names and URLs for all CSVs.
+
+`unicodify <./utilsx.html#utilsx.readin.unicodify>`_ - determine character encoding and convert to unicode.

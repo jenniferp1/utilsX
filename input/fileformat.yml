@@ -1,0 +1,12 @@
+generic email:
+    format: ["eml"]
+    offset: 0
+    signature: ["46 72 6F 6D"]
+ms office:
+    format: ["docx", "pptx", "xlsx"]
+    offset: 0
+    signature: ["50 4B 03 04 14 00 06 00"]
+user interface language:
+    format: ["xml"]
+    offset: 0
+    signature: ["3C 3F 78 6D 6C 20 76 65 72 73 69 6F 6E 3D 22 31 2E 30 22 3F 3E"]

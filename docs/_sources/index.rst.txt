@@ -1,0 +1,24 @@
+.. utilsx documentation master file, created by
+   sphinx-quickstart on Fri Oct 23 09:55:27 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to utilsx's documentation!
+==================================
+
+Utility and helper functions for reading, loading, and processing data files.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   modules
+   readin
+   fileformatyml
+
+
+.. toctree::
+  :caption: Indices:
+
+  genindex
+  py-modindex
