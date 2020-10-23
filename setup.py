@@ -80,7 +80,7 @@ setup(
     ],
     dependency_links=[
         'src/websockets-8.1-cp36-cp36m-manylinux2010_x86_64.whl',
-        'src/'
+        'src/lxml-4.5.1-cp36-cp36m-manylinux1_x86_64.whl'
     ],
     extras_require={
         # eg:
