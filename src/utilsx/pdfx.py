@@ -122,7 +122,7 @@ def clean_mn_weekly_report(file_weeklypos):
 
     dframe = dframe[~dframe.County.str.startswith("Unknown")]
 
-    fips = pd.read_csv("/home/jennifp3/Documents/datasets/county_fips.csv", dtype={"fips":str})
+    fips = pd.read_csv("/home/datasets/county_fips.csv", dtype={"fips":str})
     fips = fips[fips.stateiso=="MN"]
     fips["county"] = fips["county"].str.replace(" County","")
 
