@@ -77,10 +77,12 @@ setup(
     test_loader='unittest:TestLoader',
     install_requires=['websockets',
                       'lxml',
+                      'pyquery',
     ],
     dependency_links=[
         'src/websockets-8.1-cp36-cp36m-manylinux2010_x86_64.whl',
-        'src/lxml-4.5.1-cp36-cp36m-manylinux1_x86_64.whl'
+        'src/lxml-4.5.1-cp36-cp36m-manylinux1_x86_64.whl',
+        'src/pyquery-1.4.1-py2.py3-none-any.whl'
     ],
     extras_require={
         # eg:
